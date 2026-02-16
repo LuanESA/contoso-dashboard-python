@@ -1,6 +1,8 @@
 # app.py
 import streamlit as st
-import pandas as pd
+import os
+st.write("ENV atual no app:", os.environ.get("ENV"))
+
 
 from tratamento import (
     service_kpis,
@@ -13,12 +15,32 @@ from tratamento import (
 # CONFIGURAÇÃO INICIAL
 # =============================
 
-st.set_page_config(
+st.set_page_config( 
     page_title="Dashboard Executivo - Contoso",
     layout="wide"
 )
 
 st.title("📊 Dashboard Executivo - Contoso Retail")
+
+# =============================
+# CACHE (melhora performance)
+# =============================
+
+@st.cache_data
+def load_kpis():
+    return service_kpis()
+
+@st.cache_data
+def load_produtos():
+    return service_produtos_abc()
+
+@st.cache_data
+def load_lojas():
+    return service_lojas()
+
+@st.cache_data
+def load_paises():
+    return service_paises()
 
 # =============================
 # MENU LATERAL
@@ -42,25 +64,30 @@ if menu == "Visão Executiva":
 
     st.subheader("📌 KPIs Gerais")
 
-    df_kpis = service_kpis()
+    df_kpis = load_kpis()
 
-    faturamento = df_kpis.loc[0, "Faturamento"]
-    lucro = df_kpis.loc[0, "Lucro"]
-    margem = df_kpis.loc[0, "Margem_%"]
-    ticket = df_kpis.loc[0, "Ticket_Medio"]
+    if not df_kpis.empty:
 
-    col1, col2, col3, col4 = st.columns(4)
+        faturamento = df_kpis.loc[0, "Faturamento"]
+        lucro = df_kpis.loc[0, "Lucro"]
+        margem = df_kpis.loc[0, "Margem_%"]
+        ticket = df_kpis.loc[0, "Ticket_Medio"]
 
-    col1.metric("💰 Faturamento", f"R$ {faturamento:,.2f}")
-    col2.metric("📈 Lucro", f"R$ {lucro:,.2f}")
-    col3.metric("📊 Margem", f"{margem:.2%}")
-    col4.metric("🧾 Ticket Médio", f"R$ {ticket:,.2f}")
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.metric("💰 Faturamento", f"R$ {faturamento:,.2f}")
+        col2.metric("📈 Lucro", f"R$ {lucro:,.2f}")
+        col3.metric("📊 Margem", f"{margem:.2%}")
+        col4.metric("🧾 Ticket Médio", f"R$ {ticket:,.2f}")
+
+    else:
+        st.warning("Nenhum dado encontrado.")
 
     st.divider()
 
     st.info(
         "Este painel apresenta uma visão geral do desempenho de vendas, "
-        "lucro e eficiência operacional da Contoso."
+        "lucro e eficiência operacional."
     )
 
 # =============================
@@ -71,45 +98,50 @@ elif menu == "Produtos":
 
     st.subheader("📦 Análise de Produtos")
 
-    df_prod = service_produtos_abc()
+    df_prod = load_produtos()
 
-    # --- FILTRO ---
-    classe = st.multiselect(
-        "Filtrar por Classe ABC:",
-        options=df_prod["Classe_ABC"].unique(),
-        default=df_prod["Classe_ABC"].unique()
-    )
+    if not df_prod.empty:
 
-    df_prod = df_prod[df_prod["Classe_ABC"].isin(classe)]
+        # --- FILTRO ---
+        classe = st.multiselect(
+            "Filtrar por Classe ABC:",
+            options=df_prod["Classe_ABC"].unique(),
+            default=df_prod["Classe_ABC"].unique()
+        )
 
-    # --- TOP 10 ---
-    st.markdown("### 🔝 Top 10 Produtos por Faturamento")
+        df_filtrado = df_prod[df_prod["Classe_ABC"].isin(classe)]
 
-    top10 = df_prod.sort_values("Total", ascending=False).head(10)
+        # --- TOP 10 ---
+        st.markdown("### 🔝 Top 10 Produtos por Faturamento")
 
-    st.bar_chart(
-        top10.set_index("ProductName")["Total"]
-    )
+        top10 = df_filtrado.sort_values("Total", ascending=False).head(10)
 
-    # --- TABELA ---
-    st.markdown("### 📋 Detalhamento dos Produtos")
+        st.bar_chart(
+            top10.set_index("ProductName")["Total"]
+        )
 
-    st.dataframe(
-        df_prod[[
-            "ProductName",
-            "Total",
-            "Participacao_%",
-            "Percentual_Acumulado",
-            "Classe_ABC",
-            "Ranking"
-        ]]
-        .style.format({
-            "Total": "R$ {:,.2f}",
-            "Participacao_%": "{:.2%}",
-            "Percentual_Acumulado": "{:.2%}"
-        }),
-        use_container_width=True
-    )
+        # --- TABELA ---
+        st.markdown("### 📋 Detalhamento dos Produtos")
+
+        st.dataframe(
+            df_filtrado[[
+                "ProductName",
+                "Total",
+                "Participacao_%",
+                "Percentual_Acumulado",
+                "Classe_ABC",
+                "Ranking"
+            ]]
+            .style.format({
+                "Total": "R$ {:,.2f}",
+                "Participacao_%": "{:.2%}",
+                "Percentual_Acumulado": "{:.2%}"
+            }),
+            use_container_width=True
+        )
+
+    else:
+        st.warning("Nenhum dado encontrado.")
 
 # =============================
 # LOJAS
@@ -119,31 +151,36 @@ elif menu == "Lojas":
 
     st.subheader("🏬 Performance das Lojas")
 
-    df_lojas = service_lojas()
+    df_lojas = load_lojas()
 
-    st.markdown("### 🔝 Top Lojas por Faturamento")
+    if not df_lojas.empty:
 
-    top_lojas = df_lojas.sort_values("Total", ascending=False).head(10)
+        st.markdown("### 🔝 Top Lojas por Faturamento")
 
-    st.bar_chart(
-        top_lojas.set_index("StoreName")["Total"]
-    )
+        top_lojas = df_lojas.sort_values("Total", ascending=False).head(10)
 
-    st.markdown("### 📋 Detalhamento por Loja")
+        st.bar_chart(
+            top_lojas.set_index("StoreName")["Total"]
+        )
 
-    st.dataframe(
-        df_lojas[[
-            "StoreName",
-            "Total",
-            "Participacao_%",
-            "Ranking"
-        ]]
-        .style.format({
-            "Total": "R$ {:,.2f}",
-            "Participacao_%": "{:.2%}"
-        }),
-        use_container_width=True
-    )
+        st.markdown("### 📋 Detalhamento por Loja")
+
+        st.dataframe(
+            df_lojas[[
+                "StoreName",
+                "Total",
+                "Participacao_%",
+                "Ranking"
+            ]]
+            .style.format({
+                "Total": "R$ {:,.2f}",
+                "Participacao_%": "{:.2%}"
+            }),
+            use_container_width=True
+        )
+
+    else:
+        st.warning("Nenhum dado encontrado.")
 
 # =============================
 # PAÍSES
@@ -153,26 +190,31 @@ elif menu == "Países":
 
     st.subheader("🌎 Vendas por País")
 
-    df_paises = service_paises()
+    df_paises = load_paises()
 
-    st.markdown("### 🌍 Distribuição de Vendas por País")
+    if not df_paises.empty:
 
-    st.bar_chart(
-        df_paises.set_index("RegionCountryName")["Total"]
-    )
+        st.markdown("### 🌍 Distribuição de Vendas por País")
 
-    st.markdown("### 📋 Detalhamento por País")
+        st.bar_chart(
+            df_paises.set_index("RegionCountryName")["Total"]
+        )
 
-    st.dataframe(
-        df_paises[[
-            "RegionCountryName",
-            "Total",
-            "Participacao_%",
-            "Ranking"
-        ]]
-        .style.format({
-            "Total": "R$ {:,.2f}",
-            "Participacao_%": "{:.2%}"
-        }),
-        use_container_width=True
-    )
+        st.markdown("### 📋 Detalhamento por País")
+
+        st.dataframe(
+            df_paises[[
+                "RegionCountryName",
+                "Total",
+                "Participacao_%",
+                "Ranking"
+            ]]
+            .style.format({
+                "Total": "R$ {:,.2f}",
+                "Participacao_%": "{:.2%}"
+            }),
+            use_container_width=True
+        )
+
+    else:
+        st.warning("Nenhum dado encontrado.")
