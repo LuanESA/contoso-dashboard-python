@@ -91,6 +91,7 @@ query_categoria = """
 SELECT
     dp.ProductKey,
     dp.ProductName,
+    dpc.ProductCategoryName AS Categoria_Produto,
     SUM(fs.SalesAmount) AS Total,
     SUM(fs.TotalCost) AS Custo
 FROM FactSales fs
@@ -102,7 +103,8 @@ INNER JOIN DimProductCategory dpc
     ON dpsc.ProductCategoryKey = dpc.ProductCategoryKey
 GROUP BY
     dp.ProductKey,
-    dp.ProductName;
+    dp.ProductName,
+    dpc.ProductCategoryName;
 """
 
 df_categoria = pd.read_sql(query_categoria, engine)
