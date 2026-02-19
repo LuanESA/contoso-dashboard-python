@@ -107,3 +107,34 @@ def get_kpis_gerais():
         """
 
         return pd.read_sql(query, engine)
+
+
+
+
+def get_faturamento_por_categoria_produto():
+    if ENV == "cloud":
+        return pd.read_csv('categoria.csv')
+    
+    else:
+        from database import get_engine
+        engine = get_engine()
+
+        query = """
+        SELECT
+            dp.ProductKey,
+            dp.ProductName,
+            SUM(fs.SalesAmount) AS Total,
+            SUM(fs.TotalCost) AS Custo
+        FROM FactSales fs
+        INNER JOIN DimProduct dp
+            ON fs.ProductKey = dp.ProductKey
+        INNER JOIN DimProductSubCategory dpsc
+            ON dp.ProductSubcategoryKey = dpsc.ProductSubcategoryKey
+        INNER JOIN DimProductCategory dpc
+            ON dpsc.ProductCategoryKey = dpc.ProductCategoryKey
+        GROUP BY
+            dp.ProductKey,
+            dp.ProductName;
+        """
+
+        return pd.read_sql(query, engine)

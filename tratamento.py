@@ -3,7 +3,8 @@ from queries import (
     get_faturamento_por_produto,
     get_kpis_gerais,    
     get_top_lojas,
-    get_vendas_por_pais
+    get_vendas_por_pais,
+    get_faturamento_por_categoria_produto
 )
 
 # Genericos - Gerais
@@ -96,5 +97,25 @@ def service_paises():
 
     df = aplicar_participacao(df, 'Total')
     df = aplicar_ranking(df , 'Total')
+
+    return df
+
+
+def service_categorias():
+    df = get_faturamento_por_categoria_produto()
+    df['Total'] = pd.to_numeric(df['Total'])
+    df = aplicar_participacao(df, 'Total')
+    df = aplicar_percentual_acumulado(df, 'Total')
+
+    def classifcar_abc(x):
+        if x <= 8:
+            return 'A'
+        elif x <= 0.95:
+            return 'B'
+        else:
+            return 'C'
+        
+    df['Classe_ABC'] = df['Percentual_Acumulado'].apply(classifcar_abc)
+    df = aplicar_ranking(df, 'Total')
 
     return df

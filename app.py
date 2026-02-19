@@ -8,7 +8,8 @@ from tratamento import (
     service_kpis,
     service_produtos_abc,
     service_lojas,
-    service_paises
+    service_paises,
+    service_categorias
 )
 
 # =============================
@@ -41,6 +42,10 @@ def load_lojas():
 @st.cache_data
 def load_paises():
     return service_paises()
+
+@st.cache_data
+def load_categorias():
+    return service_categorias()
 
 # =============================
 # MENU LATERAL
@@ -120,7 +125,7 @@ elif menu == "Produtos":
             top10.set_index("ProductName")["Total"]
         )
 
-        # --- TABELA ---
+        # --- TABELA PRODUTOS ---
         st.markdown("### 📋 Detalhamento dos Produtos")
 
         st.dataframe(
@@ -139,6 +144,29 @@ elif menu == "Produtos":
             }),
             use_container_width=True
         )
+
+        # ==========================================
+        # NOVA TABELA (CATEGORIAS)
+        # ==========================================
+
+        st.subheader("📦 Categoria por Produtos")
+
+        df_categoria = load_categorias()
+
+        if not df_categoria.empty:
+
+            st.dataframe(
+                df_categoria[[
+                    "ProductName",
+                    "Categoria do Produto",
+                    "Total"
+                ]],
+                use_container_width=True
+            )
+
+        else:
+            st.warning("Nenhuma categoria encontrada.")
+
 
     else:
         st.warning("Nenhum dado encontrado.")
