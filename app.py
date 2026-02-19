@@ -159,8 +159,16 @@ elif menu == "Produtos":
                 df_categoria[[
                     "ProductName",
                     "Categoria_Produto",
-                    "Total"
-                ]],
+                    "Total",
+                    "Participacao_%",
+                    "Percentual_Acumulado",
+                    "Ranking"
+                ]]
+                .style.format({
+                    "Total": "R$ {:,.2f}",
+                    "Participacao_%": "{:.2%}",
+                    "Percentual_Acumulado": "{:.2%}"
+                }),
                 use_container_width=True
             )
 

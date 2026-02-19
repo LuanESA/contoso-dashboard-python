@@ -137,7 +137,6 @@ def get_faturamento_por_categoria_produto():
             dp.ProductKey,
             dp.ProductName,
             dpc.ProductCategoryName;
-
         """
 
         return pd.read_sql(query, engine)
