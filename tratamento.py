@@ -53,7 +53,7 @@ def service_produtos_abc():
     df = aplicar_percentual_acumulado(df, 'Total')
 
     def classifcar_abc(x):
-        if x <= 8:
+        if x <= 0.80:
             return 'A'
         elif x <= 0.95:
             return 'B'

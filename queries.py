@@ -123,6 +123,7 @@ def get_faturamento_por_categoria_produto():
         SELECT
             dp.ProductKey,
             dp.ProductName,
+            dpc.ProductCategoryName AS Categoria_Produto,
             SUM(fs.SalesAmount) AS Total,
             SUM(fs.TotalCost) AS Custo
         FROM FactSales fs
@@ -134,7 +135,9 @@ def get_faturamento_por_categoria_produto():
             ON dpsc.ProductCategoryKey = dpc.ProductCategoryKey
         GROUP BY
             dp.ProductKey,
-            dp.ProductName;
+            dp.ProductName,
+            dpc.ProductCategoryName;
+
         """
 
         return pd.read_sql(query, engine)

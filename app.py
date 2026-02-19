@@ -158,7 +158,7 @@ elif menu == "Produtos":
             st.dataframe(
                 df_categoria[[
                     "ProductName",
-                    "Categoria do Produto",
+                    "Categoria_Produto",
                     "Total"
                 ]],
                 use_container_width=True
