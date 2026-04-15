@@ -1,59 +1,150 @@
-# 📊 Dashboard de Vendas – Contoso
+# 📊 Dashboard Executivo — Contoso Retail
 
-Aplicação interativa desenvolvida em **Python** utilizando **Streamlit** para análise de dados de vendas da empresa fictícia **Contoso**.
+Dashboard interativo de análise de vendas construído com **Python** e **Streamlit**, conectado ao banco de dados **Contoso Retail DW** (Microsoft SQL Server).
 
-O objetivo do projeto é transformar dados brutos em **visualizações e indicadores interativos**, permitindo acompanhar métricas importantes de negócio como faturamento, produtos mais vendidos e desempenho por região.
-
----
-
-## 🚀 Tecnologias Utilizadas
-
-* Python
-* Streamlit
-* Pandas
-* Plotly
-* NumPy
-
-## 📈 Funcionalidades do Dashboard
-
-* 📊 Visualização do **faturamento total**
-* 📦 Produtos mais vendidos
-* 🌎 Análise de vendas por **região**
-* 📅 Filtros por **período**
-* 📉 Gráficos interativos
+O projeto transforma dados transacionais brutos em indicadores de negócio acionáveis: faturamento, margem, análise ABC de produtos, performance de lojas e distribuição geográfica de vendas.
 
 ---
 
-## ▶️ Como Executar o Projeto
-
-### 1️⃣ Clonar o repositório
+## 📁 Estrutura do projeto
 
 ```
+contoso-dashboard/
+│
+├── app.py                  # Interface Streamlit (entry point)
+├── v1_database.py             # Conexão com SQL Server via SQLAlchemy
+├── v2_queries.py              # Consultas SQL ao banco de dados
+├── v3_services.py             # Regras de negócio e transformações
+├── v4_exportar_dados.py       # Script para exportar CSVs (modo cloud)
+│
+├── raw/                    # CSVs gerados para deploy em cloud
+│   ├── faturamento_produto.csv
+│   ├── top_lojas.csv
+│   ├── vendas_por_pais.csv
+│   ├── kpis.csv
+│   └── categoria.csv
+│
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## ⚙️ Pré-requisitos
+
+* Python 3.10+
+* ODBC Driver 17 for SQL Server
+  👉 https://learn.microsoft.com/pt-br/sql/connect/odbc/download-odbc-driver-for-sql-server
+* Acesso ao banco `ContosoRetailDW` (modo local) **ou** CSVs na pasta `raw/` (modo cloud)
+
+---
+
+## 🚀 Instalação
+
+### 1. Clonar o repositório
+
+```bash
 git clone https://github.com/seuusuario/contoso-dashboard
-```
-
-### 2️⃣ Entrar na pasta do projeto
-
-```
 cd contoso-dashboard
 ```
 
-### 3️⃣ Instalar as dependências
+### 2. Instalar dependências
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
-### 4️⃣ Executar a aplicação
+### 3. Configurar variáveis de ambiente
 
+Copie o arquivo de exemplo e preencha com suas credenciais:
+
+```bash
+cp .env.example .env
 ```
-streamlit run app/app.py
+
+Conteúdo do `.env`:
+
+```env
+ENV=local
+DB_SERVER=nome-do-seu-servidor
+DB_DATABASE=ContosoRetailDW
+```
+
+### 4. Executar a aplicação
+
+```bash
+streamlit run app.py
 ```
 
 ---
 
-## 🎯 Objetivo do Projeto
+## 🔄 Modos de execução
 
-Este projeto foi desenvolvido para fins de **aprendizado em análise de dados e criação de dashboards interativos**, demonstrando como o **Streamlit** pode ser utilizado para construir aplicações de análise de dados rapidamente.
+| Variável `ENV` | Fonte de dados       | Quando usar                    |
+| -------------- | -------------------- | ------------------------------ |
+| `local`        | SQL Server via ODBC  | Desenvolvimento local          |
+| `cloud`        | CSVs na pasta `raw/` | Deploy (Streamlit Cloud, etc.) |
+
+Para gerar os CSVs antes de fazer deploy:
+
+```bash
+python exportar_dados.py --dataset all
+```
 
 ---
+
+## 📊 Funcionalidades
+
+### 📈 Visão Executiva
+
+* Faturamento total
+* Lucro
+* Margem
+* Ticket médio
+
+### 📦 Produtos
+
+* Classificação ABC por faturamento
+* Top 10 produtos com gráfico interativo
+* Detalhamento por categoria
+
+### 🏬 Lojas
+
+* Ranking de lojas por faturamento
+* Participação percentual por loja
+
+### 🌍 Países
+
+* Distribuição geográfica das vendas
+* Ranking e participação por país
+
+---
+
+## 🛠️ Tecnologias
+
+| Tecnologia    | Uso                         |
+| ------------- | --------------------------- |
+| Python 3.10+  | Linguagem principal         |
+| Streamlit     | Interface do dashboard      |
+| Pandas        | Manipulação de dados        |
+| SQLAlchemy    | Conexão com banco de dados  |
+| PyODBC        | Driver ODBC para SQL Server |
+| python-dotenv | Variáveis de ambiente       |
+
+---
+
+## 📚 Sobre o dataset
+
+O **Contoso Retail DW** é um banco de dados de demonstração disponibilizado pela Microsoft, contendo dados fictícios de uma rede varejista global.
+
+Mais informações:
+👉 https://www.microsoft.com/en-us/download/details.aspx?id=18279
+
+---
+
+## 🔮 Próximas melhorias
+
+* [ ] Evolução mensal de faturamento (análise temporal)
+* [ ] Gráficos com Plotly (hover + formatação de moeda)
+* [ ] Margem de lucro por categoria
+* [ ] Detecção de anomalias em vendas por loja
