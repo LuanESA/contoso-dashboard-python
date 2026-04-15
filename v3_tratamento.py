@@ -1,5 +1,5 @@
 import pandas as pd
-from queries import (
+from v2_queries import (
     get_faturamento_por_produto,
     get_kpis_gerais,    
     get_top_lojas,
@@ -9,11 +9,10 @@ from queries import (
 
 # Genericos - Gerais
 
-def aplicar_ranking(df, coluna):
-    df = df.sort_values(coluna, ascending=False)
+def aplicar_ranking(df: pd.DataFrame, coluna: str) -> pd.DataFrame:
+    df = df.sort_values(coluna, ascending=False).copy()
     df['Ranking'] = range(1, len(df) + 1)
     return df
-
 
 def aplicar_participacao(df, coluna):
     df['Participacao_%'] = df[coluna] / df[coluna].sum()
@@ -35,7 +34,7 @@ def service_kpis():
     # Numero
     df['Faturamento'] = pd.to_numeric(df['Faturamento'])
     df['Lucro'] = pd.to_numeric(df['Lucro'])
-    df['Quantidade'] = pd.to_numeric(df['Lucro'])
+    df['Quantidade'] = pd.to_numeric(df['Quantidade'])
 
     # Metricas
     df['Margem_%'] = df['Lucro'] / df['Faturamento']
@@ -69,7 +68,7 @@ def service_produtos_abc():
 # top produtos
 
 def service_top_produtos():
-    df = get_top_lojas()
+    df = get_faturamento_por_produto()
 
     df['Quantidade'] = pd.to_numeric(df['Quantidade'])
     df = aplicar_ranking(df, 'Quantidade')
@@ -108,7 +107,7 @@ def service_categorias():
     df = aplicar_percentual_acumulado(df, 'Total')
 
     def classifcar_abc(x):
-        if x <= 8:
+        if x <= 0.80:
             return 'A'
         elif x <= 0.95:
             return 'B'

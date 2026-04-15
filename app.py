@@ -4,7 +4,7 @@ import os
 st.write("ENV atual no app:", os.environ.get("ENV"))
 
 
-from tratamento import (
+from v3_tratamento import (
     service_kpis,
     service_produtos_abc,
     service_lojas,
